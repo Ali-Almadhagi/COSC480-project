@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meet the Team</title>
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Custom styling for sticky footer */
+        body, html {
+            height: 100%;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+        main {
+            flex: 1;
+        }
+        footer {
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <!-- Navigation Bar -->
+    <header class="bg-blue-900 text-white py-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold">Drowsiness Detection</a>
+            <!-- Hamburger Menu for Mobile -->
+            <div class="block lg:hidden">
+                <button id="nav-toggle" class="text-white focus:outline-none">
+                    <svg class="w-6 h-6 fill-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="hidden lg:flex space-x-6 text-lg">
+                <a href="/" class="hover:text-blue-300">Home</a>
+                <a href="/detection" class="hover:text-blue-300">Drowsiness Detection</a>
+                <a href="/team" class="hover:text-blue-300">Team</a>
+                <a href="/about" class="hover:text-blue-300">About</a>
+            </nav>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <nav id="nav-menu" class="lg:hidden hidden mt-2">
+            <div class="container mx-auto">
+                <a href="/" class="block py-2 text-white hover:bg-blue-700">Home</a>
+                <a href="/detection" class="block py-2 text-white hover:bg-blue-700">Drowsiness Detection</a>
+                <a href="/team" class="block py-2 text-white hover:bg-blue-700">Team</a>
+                <a href="/about" class="block py-2 text-white hover:bg-blue-700">About</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Team Section -->
+    <main class="container mx-auto my-8 p-6 bg-white rounded-lg shadow-lg">
+        <h1 class="text-4xl font-bold text-center text-blue-900 mb-6">Meet the Team</h1>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-gray-50 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                <img src="{{ url_for('static', filename='images/team_member1.jpg') }}" alt="Ali Almadhagi" class="w-32 h-32 mx-auto rounded-full mb-4">
+                <h3 class="text-xl font-semibold text-center text-blue-900">Ali Almadhagi</h3>
+                <p class="text-gray-700 text-center">Project Lead</p>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                <img src="{{ url_for('static', filename='images/team_member2.jpg') }}" alt="Ziad Sabri" class="w-32 h-32 mx-auto rounded-full mb-4">
+                <h3 class="text-xl font-semibold text-center text-blue-900">Ziad Sabri</h3>
+                <p class="text-gray-700 text-center">Lead Developer</p>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                <img src="{{ url_for('static', filename='images/team_member3.jpg') }}" alt="Akram Oudeif" class="w-32 h-32 mx-auto rounded-full mb-4">
+                <h3 class="text-xl font-semibold text-center text-blue-900">Akram Oudeif</h3>
+                <p class="text-gray-700 text-center">Data Scientist</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="bg-blue-900 text-white py-4 text-center mt-auto">
+        <p>&copy; 2024 Drowsiness Detection. All rights reserved.</p>
+        <div class="mt-4">
+            <a href="#" class="text-white hover:text-blue-300 mx-2">Facebook</a>
+            <a href="#" class="text-white hover:text-blue-300 mx-2">Twitter</a>
+            <a href="#" class="text-white hover:text-blue-300 mx-2">LinkedIn</a>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Toggle Menu -->
+    <script>
+        const navToggle = document.getElementById('nav-toggle');
+        const navMenu = document.getElementById('nav-menu');
+
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>
