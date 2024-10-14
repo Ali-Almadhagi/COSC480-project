@@ -1,12 +1,33 @@
-# Load and preprocess data
 #imports
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 
+
+# Define a CNN model
+class CNN(nn.Module):
+    def __init__(self):
+        super(CNN, self).__init__()
+        self.conv1 = nn.Conv2d(3, 16, 3, padding=1)
+        self.conv2 = nn.Conv2d(16, 32, 3, padding=1)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.fc1 = nn.Linear(32 * 56 * 56, 128)
+        self.fc2 = nn.Linear(128, 2)  # Adjusted for 2 classes: drowsy and non-drowsy
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        x = self.pool(self.relu(self.conv1(x)))
+        x = self.pool(self.relu(self.conv2(x)))
+        x = x.view(-1, 32 * 56 * 56)
+        x = self.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+
+# Load and preprocess data
 #transform tensor
 transform = transforms.Compose([
     transforms.ToTensor(),
@@ -14,24 +35,28 @@ transform = transforms.Compose([
 ])
 
 # Load the training dataset
-#file path 
-train_dir = 'ExamplePath'
+#file path
+train_dir = '../Driver Drowsiness Dataset (DDD)'
 
-#load train and test folder 
-train_dataset = torchvision.datasets.ImageFolder(root=train_dir, transform=transform)
-test_dataset = torchvision.datasets.ImageFolder(root=train_dir, transform=transform)
+# Load the dataset
+dataset = torchvision.datasets.ImageFolder(root=train_dir, transform=transform)
 
 #set batch size
 batch_size = 64
+train_test_split_ratio = 0.8
+
+# Split the dataset into training and testing sets (80% training, 20% testing)
+train_size = int(train_test_split_ratio * len(dataset))
+test_size = len(dataset) - train_size
+train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+
 
 #load train and test data
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-#check if data was indexed properly 
-print(train_dataset.class_to_idx)
-
-# Build a simple CNN model for demonstration purposes
+#check if data was indexed properly
+print(dataset.class_to_idx)
 
 
 # Train the model
