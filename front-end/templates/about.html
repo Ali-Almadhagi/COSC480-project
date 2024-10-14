@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Drowsiness Detection</title>
+    <title>About Us</title>
     <!-- Tailwind CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
@@ -57,40 +57,38 @@
         </nav>
     </header>
 
-    <!-- Hero Section with New Background Image -->
-    <section class="relative bg-cover bg-center min-h-screen" style="background-image: url('{{ url_for('static', filename='images/background.webp') }}');">
-        <!-- Dark overlay for better text visibility -->
-        <div class="absolute inset-0 bg-black opacity-70"></div>
+    <!-- About Section -->
+    <main class="container mx-auto my-8 p-6 bg-white rounded-lg shadow-lg">
+        <h1 class="text-4xl font-bold text-center text-blue-900 mb-6">About Our Project</h1>
+        <p class="text-gray-700 text-center mb-8">Our mission is to reduce accidents caused by drowsy driving by utilizing cutting-edge machine learning technologies to detect drowsiness in real-time.</p>
 
-        <!-- Hero content -->
-        <div class="relative z-10 container mx-auto h-full flex flex-col justify-center items-center text-center">
-            <h1 class="text-white text-5xl md:text-6xl font-bold leading-tight">Stay Safe with Drowsiness Detection</h1>
-            <p class="text-white mt-4 text-lg md:text-xl max-w-2xl">Advanced technology to keep you awake and alert on the road.</p>
-            <a href="/detection" class="mt-6 px-8 py-3 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-600 text-lg">Start Detection</a>
+        <h2 class="text-3xl font-bold text-center text-blue-900 mb-4">Why Drowsiness Detection?</h2>
+        <p class="text-gray-700 text-center mb-8">Drowsy driving is a leading cause of accidents, with thousands of lives lost each year. Our system helps detect early signs of drowsiness and alerts the driver before it's too late.</p>
+
+        <!-- Call-to-Action -->
+        <div class="text-center mt-8">
+            <a href="/detection" class="px-8 py-3 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-600">Try Our Detection System</a>
         </div>
-    </section>
 
-    <!-- Key Features Section -->
-    <section id="features" class="container mx-auto my-16 p-8">
-        <h2 class="text-3xl font-bold text-center mb-12 text-blue-900">Key Features of Our System</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                <img src="{{ url_for('static', filename='images/real-time-monitoring.webp') }}" alt="Real-time Monitoring" class="w-16 h-16 mx-auto mb-4">
-                <h3 class="text-xl font-semibold text-blue-900">Real-time Monitoring</h3>
-                <p class="text-gray-700 mt-2">Our system monitors drivers continuously to detect drowsiness signs.</p>
+        <h1 class="text-4xl font-bold text-center text-blue-900 mb-6 mt-10">Meet the Team</h1>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-gray-50 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                <img src="{{ url_for('static', filename='images/team_member1.jpg') }}" alt="Ali Almadhagi" class="w-32 h-32 mx-auto rounded-full mb-4">
+                <h3 class="text-xl font-semibold text-center text-blue-900">Ali Almadhagi</h3>
+                <p class="text-gray-700 text-center">Developer</p>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                <img src="{{ url_for('static', filename='images/deep-learning.webp') }}" alt="AI-Powered Detection" class="w-16 h-16 mx-auto mb-4">
-                <h3 class="text-xl font-semibold text-blue-900">AI-Powered Detection</h3>
-                <p class="text-gray-700 mt-2">Using advanced machine learning algorithms, we ensure accurate results.</p>
+            <div class="bg-gray-50 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                <img src="{{ url_for('static', filename='images/team_member2.jpg') }}" alt="Ziad Sabri" class="w-32 h-32 mx-auto rounded-full mb-4">
+                <h3 class="text-xl font-semibold text-center text-blue-900">Ziad Sabri</h3>
+                <p class="text-gray-700 text-center">Developer</p>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                <img src="{{ url_for('static', filename='images/alerts.webp') }}" alt="Instant Alerts" class="w-16 h-16 mx-auto mb-4">
-                <h3 class="text-xl font-semibold text-blue-900">Instant Alerts</h3>
-                <p class="text-gray-700 mt-2">Get immediate alerts if drowsiness is detected to prevent accidents.</p>
+            <div class="bg-gray-50 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                <img src="{{ url_for('static', filename='images/team_member3.jpg') }}" alt="Akram Oudeif" class="w-32 h-32 mx-auto rounded-full mb-4">
+                <h3 class="text-xl font-semibold text-center text-blue-900">Akram Oudeif</h3>
+                <p class="text-gray-700 text-center">Developer</p>
             </div>
         </div>
-    </section>
+    </main>
 
     <!-- Footer Section -->
     <footer class="bg-blue-900 text-white py-4 text-center mt-auto">

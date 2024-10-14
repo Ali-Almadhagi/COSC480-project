@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drowsiness Detection</title>
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Custom styling for sticky footer */
+        body, html {
+            height: 100%;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+        main {
+            flex: 1;
+        }
+        footer {
+            bottom: 0;
+            width: 100%;
+        }
+        /* Pulsing animation for detection status */
+        .pulsing-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ffcc00; /* Yellow color for visibility */
+            position: relative;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7);
+            }
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 20px rgba(255, 204, 0, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(255, 204, 0, 0);
+            }
+        }
+
+        .text-indicator {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1c3d5a;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <!-- Navigation Bar -->
+    <header class="bg-blue-900 text-white py-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold">Drowsiness Detection</a>
+            <!-- Hamburger Menu for Mobile -->
+            <div class="block lg:hidden">
+                <button id="nav-toggle" class="text-white focus:outline-none">
+                    <svg class="w-6 h-6 fill-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="hidden lg:flex space-x-6 text-lg">
+                <a href="/" class="hover:text-blue-300">Home</a>
+                <a href="/detection" class="hover:text-blue-300">Drowsiness Detection</a>
+                <a href="/about" class="hover:text-blue-300">About</a>
+            </nav>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <nav id="nav-menu" class="lg:hidden hidden mt-2">
+            <div class="container mx-auto">
+                <a href="/" class="block py-2 text-white hover:bg-blue-700">Home</a>
+                <a href="/detection" class="block py-2 text-white hover:bg-blue-700">Drowsiness Detection</a>
+                <a href="/about" class="block py-2 text-white hover:bg-blue-700">About</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto my-8 p-6 bg-white rounded-lg shadow-lg">
+        <h1 class="text-4xl font-bold text-center text-blue-900 mb-6">Drowsiness Detection</h1>
+        <p class="text-gray-700 text-center mb-8">Ensure you're always alert behind the wheel with our advanced detection system. Your camera will be used to capture images every 15 seconds, which will be analyzed for signs of drowsiness.</p>
+
+        <!-- Video and Canvas Section -->
+        <div class="flex justify-center">
+            <video id="video" class="hidden" autoplay></video>
+            <canvas id="canvas" class="hidden"></canvas>
+        </div>
+
+        <div class="text-center mt-8">
+            <p class="text-gray-600">Your camera will be used to monitor signs of drowsiness. The app will capture images every 15 seconds and process them for analysis.</p>
+        </div>
+
+        <!-- Animation for indicating the system is running -->
+        <div class="flex flex-col items-center mt-8">
+            <div class="pulsing-circle"></div>
+            <p class="text-indicator">Detection is Running...</p>
+        </div>
+        <!-- Stop Detection Button -->
+        <div class="text-center mt-8">
+            <button id="stop-detection" class="px-8 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600">Stop Detection</button>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="bg-blue-900 text-white py-4 text-center mt-auto">
+        <p>&copy; 2024 Drowsiness Detection. All rights reserved.</p>
+        <div class="mt-4">
+            <a href="#" class="text-white hover:text-blue-300 mx-2">Facebook</a>
+            <a href="#" class="text-white hover:text-blue-300 mx-2">Twitter</a>
+            <a href="#" class="text-white hover:text-blue-300 mx-2">LinkedIn</a>
+        </div>
+    </footer>
+
+    <!-- Link to the app.js file -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+    <!-- JavaScript for Toggle Menu -->
+    <script>
+        const navToggle = document.getElementById('nav-toggle');
+        const navMenu = document.getElementById('nav-menu');
+
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('hidden');
+        });
+    </script>
+    <!-- JavaScript for Stop Detection Functionality -->
+    <script>
+        // Stop the detection and return to the homepage
+        document.getElementById('stop-detection').addEventListener('click', function() {
+            // Stop the camera
+            if (videoStream) {
+                const tracks = videoStream.getTracks();
+                tracks.forEach(track => track.stop());
+                videoStream = null;
+            }
+
+            // Clear cache data
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                });
+            }
+
+            // Redirect to home page
+            window.location.href = "/";
+        });
+
+    </script>
+</body>
+</html>
