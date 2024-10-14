@@ -60,3 +60,24 @@ print(dataset.class_to_idx)
 
 
 # Train the model
+
+#train and eval functions
+#
+#
+#
+#
+
+
+num_epochs = 5
+# opt to use gpu if device has it
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model.to(device)
+
+#loop through epochs
+for epoch in range(num_epochs):
+    train_loss, train_acc = train(model, train_loader, criterion, optimizer)
+    test_loss, test_acc = evaluate(model, test_loader, criterion)
+
+
+cnn_test_loss, cnn_test_acc = evaluate(model, test_loader, criterion)
+print(f"cnn Test Loss: {cnn_test_loss:.4f}, Test Accuracy: {cnn_test_acc:2f}%")
