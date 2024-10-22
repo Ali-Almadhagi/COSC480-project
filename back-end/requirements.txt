@@ -16,3 +16,4 @@ torch==2.4.1
 torchvision==0.19.1
 typing_extensions==4.12.2
 Werkzeug==3.0.4
+tqdm ==4.66.5

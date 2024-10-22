@@ -1,5 +1,5 @@
 let videoStream = null;
-let captureInterval = 20000; // Capture every 15 seconds
+let captureInterval = 15000; // Capture every 15 seconds
 
 // Function to start the camera, capture an image, and stop the camera
 function captureImage() {
