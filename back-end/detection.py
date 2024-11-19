@@ -27,23 +27,66 @@ transform = transforms.Compose([
 # Initialize the MTCNN face detector
 mtcnn = MTCNN(keep_all=False, device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
 
+def calculate_average_brightness(image):
+    # Convert image to grayscale to calculate brightness
+    grayscale_image = image.convert("L")
+    np_image = np.array(grayscale_image)
+
+    # Calculate average brightness (mean pixel value)
+    avg_brightness = np.mean(np_image)
+    return avg_brightness
+
 # Function to detect and crop face using MTCNN
 def detect_and_crop_face(image_path):
     # Open the image using PIL
     img = Image.open(image_path).convert("RGB")
 
-    # Detect face using MTCNN and get the cropped face
-    face = mtcnn(img)
+    # Find the avg brightness
+    avg_brightness = calculate_average_brightness(img)
+    print(f"Average brightness: {avg_brightness}")
 
-    # If no face is detected, return the original image
+    # Detect face using MTCNN
+    face = mtcnn(img)
+    # If no face is detected, return the original image and save it to desktop
     if face is None:
         print("No face detected. Using the original image.")
+
+        # Define the path to save the image (change 'your_username' to your actual desktop path if needed)
+        desktop_path = os.path.join(os.path.expanduser("~"), "Desktop", "no_face_detected_image.jpg")
+
+        # Save the image to the desktop
+        img.save(desktop_path)
+        print(f"Image saved to: {desktop_path}")
+
         return img
     else:
         print("Face detected and cropped successfully.")
         # Convert the tensor output from MTCNN to a PIL image
-        face_pil = transforms.ToPILImage()(face.squeeze(0))
-        return face_pil
+        cropped_face = transforms.ToPILImage()(face.squeeze(0))
+
+
+    # Calculate the average brightness of the image
+    avg_brightness = calculate_average_brightness(cropped_face)
+    print(f"Average brightness: {avg_brightness}")
+
+
+    # We will enhance the brightness if the average is below a certain level
+    if avg_brightness < 30:
+        brightness_factor = 5.0
+    elif avg_brightness > 50:
+        brightness_factor = 2.0
+    else:
+        brightness_factor = 3.0
+
+    # Increase the brightness of the image
+    enhancer = ImageEnhance.Brightness(cropped_face)
+    cropped_face = enhancer.enhance(brightness_factor)
+
+    # Show the image to verify it's loaded correctly
+    cropped_face.show()
+
+    return cropped_face
+
 
 # Prediction function using ResNet model
 def predict_drowsiness(image_path, model):
