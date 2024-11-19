@@ -73,3 +73,39 @@ function startPeriodicCapture() {
 // Start the periodic capture when the page loads
 window.onload = startPeriodicCapture;
 
+
+// Function to send the image data to the server
+function sendImageToServer(imageData) {
+    fetch('/process_image', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: imageData })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Drowsiness detection result:', data.result);
+        // Update the detection result in the HTML
+        const resultElement = document.getElementById('detection-result');
+        if (data.result === 'drowsy') {
+            resultElement.textContent = 'Drowsy detected! Please take a break.';
+            resultElement.style.color = 'red'; // Make it red for alert
+        } else if (data.result === 'not drowsy') {
+            resultElement.textContent = 'You are alert. Keep going!';
+            resultElement.style.color = 'green'; // Make it green for safe
+        } else {
+            resultElement.textContent = 'Detection result unavailable.';
+            resultElement.style.color = 'gray'; // Neutral color
+        }
+    })
+    .catch(error => {
+        console.error('Error sending image:', error);
+        // Show an error message in the HTML
+        const resultElement = document.getElementById('detection-result');
+        resultElement.textContent = 'Error processing detection.';
+        resultElement.style.color = 'red';
+    });
+}
+
+
