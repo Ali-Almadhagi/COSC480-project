@@ -1,5 +1,5 @@
 let videoStream = null;
-let captureInterval = 15000; // Capture every 15 seconds
+let captureInterval = 10000; // Capture every 10 seconds
 
 // Function to start the camera, capture an image, and stop the camera
 function captureImage() {
@@ -15,6 +15,8 @@ function captureImage() {
 
         // When the video is ready, capture the image
         videoElement.onloadedmetadata = () => {
+            setTimeout(() => {
+
             // Capture the image using a canvas
             const canvas = document.getElementById('canvas');
             const context = canvas.getContext('2d');
@@ -30,6 +32,7 @@ function captureImage() {
 
             // Stop the camera to save battery
             stopCamera();
+            }, 3000);
         };
     })
     .catch(err => {
@@ -72,4 +75,5 @@ function startPeriodicCapture() {
 
 // Start the periodic capture when the page loads
 window.onload = startPeriodicCapture;
+
 
