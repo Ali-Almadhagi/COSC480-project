@@ -1,10 +1,11 @@
 import torch
 import torchvision.transforms as transforms
-from PIL import Image
+from PIL import Image, ImageEnhance, ImageOps
 import os
 from facenet_pytorch import MTCNN
 import torch.nn as nn
 from torchvision.models import resnet18, ResNet18_Weights
+import numpy as np
 
 
 # Load the pre-trained ResNet model with a modified final layer
@@ -27,31 +28,20 @@ transform = transforms.Compose([
 # Initialize the MTCNN face detector
 mtcnn = MTCNN(keep_all=False, device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
 
-def calculate_average_brightness(image):
-    # Convert image to grayscale to calculate brightness
-    grayscale_image = image.convert("L")
-    np_image = np.array(grayscale_image)
-
-    # Calculate average brightness (mean pixel value)
-    avg_brightness = np.mean(np_image)
-    return avg_brightness
 
 # Function to detect and crop face using MTCNN
 def detect_and_crop_face(image_path):
     # Open the image using PIL
     img = Image.open(image_path).convert("RGB")
 
-    # Find the avg brightness
-    avg_brightness = calculate_average_brightness(img)
-    print(f"Average brightness: {avg_brightness}")
-
     # Detect face using MTCNN
-    face = mtcnn(img)
+    boxes, _ = mtcnn.detect(img)
+
     # If no face is detected, return the original image and save it to desktop
-    if face is None:
+    if boxes is None:
         print("No face detected. Using the original image.")
 
-        # Define the path to save the image (change 'your_username' to your actual desktop path if needed)
+        # Define the path to save the image
         desktop_path = os.path.join(os.path.expanduser("~"), "Desktop", "no_face_detected_image.jpg")
 
         # Save the image to the desktop
@@ -61,31 +51,12 @@ def detect_and_crop_face(image_path):
         return img
     else:
         print("Face detected and cropped successfully.")
-        # Convert the tensor output from MTCNN to a PIL image
-        cropped_face = transforms.ToPILImage()(face.squeeze(0))
 
+        # Extract the first detected face box
+        box = boxes[0]
+        cropped_face = img.crop((box[0], box[1], box[2], box[3]))
 
-    # Calculate the average brightness of the image
-    avg_brightness = calculate_average_brightness(cropped_face)
-    print(f"Average brightness: {avg_brightness}")
-
-
-    # We will enhance the brightness if the average is below a certain level
-    if avg_brightness < 30:
-        brightness_factor = 5.0
-    elif avg_brightness > 50:
-        brightness_factor = 2.0
-    else:
-        brightness_factor = 3.0
-
-    # Increase the brightness of the image
-    enhancer = ImageEnhance.Brightness(cropped_face)
-    cropped_face = enhancer.enhance(brightness_factor)
-
-    # Show the image to verify it's loaded correctly
-    cropped_face.show()
-
-    return cropped_face
+        return cropped_face
 
 
 # Prediction function using ResNet model

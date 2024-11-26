@@ -28,29 +28,46 @@ def about():
 @app.route('/process_image', methods=['POST'])
 def process_image():
     try:
-        # Parse the JSON payload
+        # Ensure that Content-Type is application/json and handle base64 encoding correctly
         data = request.get_json()
+
         if not data or 'image' not in data:
             return jsonify({'error': 'No image data provided'}), 400
 
         image_data = data['image']
+        
+        # Debugging the incoming image data
+        if not image_data.startswith('data:image'):
+            return jsonify({'error': 'Invalid image format, expected base64 encoded data URL'}), 400
+        
+        # Extract base64-encoded image data
         header, encoded = image_data.split(',', 1)
+        
+        # Decode the base64 image data
+        try:
+            image = base64.b64decode(encoded)
+        except Exception as e:
+            return jsonify({'error': f'Failed to decode image: {str(e)}'}), 500
 
-        # Decode and save the image temporarily
-        image = base64.b64decode(encoded)
+        # Save the image to a temporary file
         image_path = os.path.join(app.static_folder, 'captured_image.png')
         with open(image_path, 'wb') as img_file:
             img_file.write(image)
 
-        # Use the loaded model to predict drowsiness
+        # Use the loaded model to predict drowsiness (ensure predict_drowsiness works)
         result = predict_drowsiness(image_path, model)
 
-        # Return the result as a JSON response
-        return jsonify(result=result), 200
+        if not result:
+            return jsonify({'error': 'Failed to process image with model'}), 500
+
+        # Check drowsiness result and send it back in the response
+        is_drowsy = result.get('drowsy', False)  # Assuming 'drowsy' key indicates drowsiness
+
+        return jsonify({'result': result, 'drowsy': is_drowsy}), 200
 
     except Exception as e:
-        # Catch and return any server-side exceptions
-        return jsonify({'error': str(e)}), 500
+        # Return a more descriptive error if something goes wrong
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

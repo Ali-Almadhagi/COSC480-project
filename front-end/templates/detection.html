@@ -160,6 +160,45 @@
             // Redirect to home page
             window.location.href = "/";
         });
+        // Request browser notification permissions on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (Notification.permission === 'default') {
+    Notification.requestPermission().then(permission => {
+        console.log('Notification permission:', permission);
+    });
+}
+
+    });
+    // Function to process the response from the server
+    function handleServerResponse(response) {
+        if (response.drowsy) {
+            // Trigger a browser notification
+            if (Notification.permission === 'granted') {
+                new Notification('Drowsiness Alert', {
+                    body: "You're drowsy! Please take a break.",
+                    icon: '/static/alert-icon.png' // Update with the actual path to your icon
+                });
+            }
+        }
+    }
+
+    // Example function to simulate sending the image to the backend
+    async function sendImageToServer(imageData) {
+        try {
+            const response = await fetch('/process_image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image: imageData })
+            });
+
+            const data = await response.json();
+            handleServerResponse(data);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 
     </script>
 </body>
