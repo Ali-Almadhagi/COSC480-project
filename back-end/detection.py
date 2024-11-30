@@ -56,7 +56,7 @@ def detect_and_crop_face(image_path):
         cropped_face = (cropped_face + 1) / 2  # Rescale to [0, 1]
 
         cropped_face_pil = transforms.ToPILImage()(cropped_face)
-        #cropped_face_pil.show()
+        cropped_face_pil.show()
 
     return cropped_face_pil
 

@@ -1,5 +1,5 @@
 let videoStream = null;
-let captureInterval = 15000; // Capture every 15 seconds
+let captureInterval = 10000; // Capture every 10 seconds
 
 // Function to start the camera, capture an image, and stop the camera
 function captureImage() {
@@ -15,21 +15,20 @@ function captureImage() {
 
         // When the video is ready, capture the image
         videoElement.onloadedmetadata = () => {
-            // Capture the image using a canvas
-            const canvas = document.getElementById('canvas');
-            const context = canvas.getContext('2d');
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
-            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            setTimeout(() => {
+    console.log("Capturing Image...");
+    // Capture the image
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
+    context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-            // Convert the canvas content (image) to base64 format
-            const imageData = canvas.toDataURL('image/png');
-
-            // Send the image to the server (implement this in Flask)
-            sendImageToServer(imageData);
-
-            // Stop the camera to save battery
-            stopCamera();
+    const imageData = canvas.toDataURL('image/png');
+    sendImageToServer(imageData);
+    stopCamera();
+    console.log("Image captured and camera stopped.");
+}, 3000);
         };
     })
     .catch(err => {
@@ -46,6 +45,12 @@ function stopCamera() {
     }
 }
 
+// function playNotificationSound() {
+//     const sound = new Audio('https://www.soundjay.com/button/beep-07.wav'); // Replace with your desired sound URL
+//     sound.play();
+// }
+
+
 // Function to send the image data to the server
 function sendImageToServer(imageData) {
     fetch('/process_image', {
@@ -58,6 +63,20 @@ function sendImageToServer(imageData) {
     .then(response => response.json())
     .then(data => {
         console.log('Drowsiness detection result:', data.result);
+
+        // Show a SweetAlert notification if the result is "drowsy"
+        if (data.result === 'Drowsy') {
+
+            // // Play sound
+            // playNotificationSound();
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Drowsiness Detected!',
+                text: 'You are drowsy! Please wake up.',
+                confirmButtonText: 'Okay'
+            });
+        }
     })
     .catch(error => {
         console.error('Error sending image:', error);
@@ -72,4 +91,6 @@ function startPeriodicCapture() {
 
 // Start the periodic capture when the page loads
 window.onload = startPeriodicCapture;
+
+
 
