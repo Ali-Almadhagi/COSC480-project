@@ -82,7 +82,7 @@ def detect_and_crop_face(image_path, zoom_out_factor=1.2):
 
         # Crop the image using the expanded bounding box
         cropped_face = img.crop((x1, y1, x2, y2))
-        #cropped_face.show()
+        cropped_face.show()
 
         return cropped_face
 
@@ -102,7 +102,7 @@ def predict_drowsiness(image_path, model):
         class_index = predicted.item()
 
     # Map the predicted class index to class name
-    class_names = ['Non-Drowsy', 'Drowsy']
+    class_names = ['Drowsy', 'Non Drowsy']
     result = class_names[class_index]
     return result
 
