@@ -5,15 +5,21 @@ import os
 from facenet_pytorch import MTCNN
 import torch.nn as nn
 from torchvision.models import resnet18, ResNet18_Weights
+from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
 import numpy as np
 
 
 # Load the pre-trained ResNet model with a modified final layer
 def load_model():
-    weights = ResNet18_Weights.DEFAULT
-    model = resnet18(weights=weights)
-    model.fc = nn.Linear(model.fc.in_features, 2)
-    model_path = "models/drowsiness_detection_model_resnet18.pth"
+    # Load ResNet18 model with pretrained weights
+    # Load EfficientNet B0 model with pretrained weights
+    model = efficientnet_b0(weights=None)
+
+    # Modify the final fully connected layer for binary classification
+    model.classifier[1] = nn.Sequential(
+        nn.Linear(model.classifier[1].in_features, 2)  # Binary classification layer
+    )
+    model_path = "models/drowsiness_detection_efficientnet_b0.pth"
     model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     model.eval()
     return model
@@ -30,35 +36,56 @@ mtcnn = MTCNN(keep_all=False, device=torch.device('cuda' if torch.cuda.is_availa
 
 
 # Function to detect and crop face using MTCNN
-def detect_and_crop_face(image_path):
+def detect_and_crop_face(image_path, zoom_out_factor=1.2):
+    """
+    Detect and crop the face from the image, with a zoom-out factor to include the whole head.
+
+    Args:
+        image_path (str): Path to the input image.
+        zoom_out_factor (float): Factor by which to expand the bounding box (default is 1.2 for 20% zoom out).
+
+    Returns:
+        PIL.Image: The cropped image, or the original image if no face is detected.
+    """
     # Open the image using PIL
     img = Image.open(image_path).convert("RGB")
 
     # Detect face using MTCNN
-    face = mtcnn(img)
-    # If no face is detected, return the original image and save it to desktop
-    if face is None:
+    boxes, _ = mtcnn.detect(img)
+
+    # If no face is detected, return the original image
+    if boxes is None:
         print("No face detected. Using the original image.")
 
-        # Define the path to save the image (change 'your_username' to your actual desktop path if needed)
+        # Save the image to the desktop for debugging purposes
         desktop_path = os.path.join(os.path.expanduser("~"), "Desktop", "no_face_detected_image.jpg")
-
-        # Save the image to the desktop
         img.save(desktop_path)
         print(f"Image saved to: {desktop_path}")
 
         return img
     else:
-        print("Face detected and cropped successfully.")
+        print("Face detected. Cropping the image.")
 
-        #Rescale tensor values from [-1, 1] to [0, 1]
-        cropped_face = face.squeeze(0)  # Remove batch dimension
-        cropped_face = (cropped_face + 1) / 2  # Rescale to [0, 1]
+        # Get the first detected bounding box
+        box = boxes[0]
+        x1, y1, x2, y2 = box
 
-        cropped_face_pil = transforms.ToPILImage()(cropped_face)
-        cropped_face_pil.show()
+        # Calculate the width and height of the bounding box
+        width = x2 - x1
+        height = y2 - y1
 
-    return cropped_face_pil
+        # Expand the bounding box dimensions for zoom-out effect
+        x1 = max(0, x1 - (width * (zoom_out_factor - 1) / 2))
+        y1 = max(0, y1 - (height * (zoom_out_factor - 1) / 2))
+        x2 = min(img.width, x2 + (width * (zoom_out_factor - 1) / 2))
+        y2 = min(img.height, y2 + (height * (zoom_out_factor - 1) / 2))
+
+        # Crop the image using the expanded bounding box
+        cropped_face = img.crop((x1, y1, x2, y2))
+        #cropped_face.show()
+
+        return cropped_face
+
 
 # Prediction function using ResNet model
 def predict_drowsiness(image_path, model):
