@@ -102,7 +102,7 @@ def predict_drowsiness(image_path, model):
         class_index = predicted.item()
 
     # Map the predicted class index to class name
-    class_names = ['Drowsy', 'Non Drowsy']
+    class_names = ['Non Drowsy', 'Drowsy']
     result = class_names[class_index]
     return result
 
