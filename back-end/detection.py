@@ -19,7 +19,7 @@ def load_model():
     model.classifier[1] = nn.Sequential(
         nn.Linear(model.classifier[1].in_features, 2)  # Binary classification layer
     )
-    model_path = "models/drowsiness_detection_efficientnet_b0.pth"
+    model_path = "models/drowsiness_detection_efficientnet_b0(2).pth"
     model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     model.eval()
     return model
@@ -82,7 +82,7 @@ def detect_and_crop_face(image_path, zoom_out_factor=1.2):
 
         # Crop the image using the expanded bounding box
         cropped_face = img.crop((x1, y1, x2, y2))
-        cropped_face.show()
+        #cropped_face.show()
 
         return cropped_face
 
@@ -98,11 +98,16 @@ def predict_drowsiness(image_path, model):
     # Make prediction
     with torch.no_grad():
         outputs = model(img_tensor)
-        _, predicted = torch.max(outputs, 1)
+        probabilities = torch.softmax(outputs, dim=1)
+
+        print("Raw outputs (logits):", outputs)  # Debug: Log raw outputs
+        print("Probabilities:", probabilities)  # Debug: Log probabilities
+
+        _, predicted = torch.max(probabilities, 1)  # Select the class with highest probability
         class_index = predicted.item()
 
     # Map the predicted class index to class name
-    class_names = ['Non Drowsy', 'Drowsy']
+    class_names = ['Drowsy', 'Non Drowsy']
     result = class_names[class_index]
     return result
 
