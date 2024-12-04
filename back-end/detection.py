@@ -11,7 +11,6 @@ import numpy as np
 
 # Load the pre-trained ResNet model with a modified final layer
 def load_model():
-    # Load ResNet18 model with pretrained weights
     # Load EfficientNet B0 model with pretrained weights
     model = efficientnet_b0(weights=None)
 
@@ -19,7 +18,7 @@ def load_model():
     model.classifier[1] = nn.Sequential(
         nn.Linear(model.classifier[1].in_features, 2)  # Binary classification layer
     )
-    model_path = "models/drowsiness_detection_efficientnet_b0(2).pth"
+    model_path = "models/drowsiness_detection_efficientnet_b0.pth"
     model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     model.eval()
     return model
@@ -82,7 +81,7 @@ def detect_and_crop_face(image_path, zoom_out_factor=1.2):
 
         # Crop the image using the expanded bounding box
         cropped_face = img.crop((x1, y1, x2, y2))
-        #cropped_face.show()
+        cropped_face.show()
 
         return cropped_face
 
@@ -124,5 +123,5 @@ def main():
     prediction = predict_drowsiness('path/to/your_image.jpg', model, device)
     print(f"Prediction:{prediction}")
 
-if __name__ == '__main__':
+if __name__ == '_main_':
     main()
