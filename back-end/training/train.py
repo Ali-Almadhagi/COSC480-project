@@ -1,11 +1,12 @@
 import torch
+from torchvision import models
+from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
 import torchvision.transforms as transforms
-from torch.utils.data import DataLoader, random_split, Subset
+from torch.utils.data import DataLoader, Subset
 from torchvision.datasets import ImageFolder
-from torchvision.models import resnet18
 import torch.nn as nn
 import torch.optim as optim
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
@@ -19,8 +20,9 @@ def plot_confusion_matrix(true_labels, predicted_labels, classes):
 
 def main():
     # Parameters
-    batch_size = 64
-    num_epochs = 10
+    batch_size = 32
+    num_epochs = 5
+    learning_rate = 0.00001
     data_dir = '/content/Driver Drowsiness Dataset (DDD)'
 
     # Check if GPU is available
@@ -29,31 +31,31 @@ def main():
 
     # Data augmentation for training
     train_transform = transforms.Compose([
-        transforms.Resize((224, 224)),
+        transforms.Resize((224, 224)),  # Resize images to 224x224 for EfficientNet
         transforms.RandomHorizontalFlip(p=0.5),
-        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
         transforms.RandomRotation(15),
-        transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261)),
-    ])
-
-    # Basic transformation for validation
-    test_transform = transforms.Compose([
-        transforms.Resize((224, 224)),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
         transforms.ToTensor(),
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
     ])
 
-     # Load dataset and apply transformations
+    # Basic transformation for validation
+    test_transform = transforms.Compose([
+        transforms.Resize((224, 224)),  # Resize images to 224x224 for EfficientNet
+        transforms.ToTensor(),
+        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))
+    ])
+
+    # Load dataset and apply transformations
     dataset = ImageFolder(root=data_dir)
 
     # Separate indices by class
     drowsy_indices = [i for i, (_, label) in enumerate(dataset.samples) if label == dataset.class_to_idx['Drowsy']]
     non_drowsy_indices = [i for i, (_, label) in enumerate(dataset.samples) if label == dataset.class_to_idx['Non Drowsy']]
 
-    # Split each class into 95% training and 5% validation
-    drowsy_train_size = int(0.95 * len(drowsy_indices))
-    non_drowsy_train_size = int(0.95 * len(non_drowsy_indices))
+    # Split each class into 90% training and 10% validation
+    drowsy_train_size = int(0.90 * len(drowsy_indices))
+    non_drowsy_train_size = int(0.90 * len(non_drowsy_indices))
 
     # Split the indices for each class
     drowsy_train_indices = drowsy_indices[:drowsy_train_size]
@@ -74,21 +76,22 @@ def main():
     val_dataset.dataset.transform = test_transform
 
     # Create DataLoaders
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=8)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=8)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
-    # Initialize resnet18 model
-    model = resnet18(pretrained=True)
-    # Freeze all layers except the final fully connected layer
-    for param in model.parameters():
-        param.requires_grad = False
-    # Replace the final layer for binary classification (drowsy and non-drowsy)
-    model.fc = nn.Linear(model.fc.in_features, 2)
+    # Load EfficientNet B0 model with pretrained weights
+    model = efficientnet_b0(weights=EfficientNet_B0_Weights.IMAGENET1K_V1)
+
+    # Modify the final fully connected layer for binary classification
+    model.classifier[1] = nn.Sequential(
+        nn.Linear(model.classifier[1].in_features, 2)  # Binary classification layer
+    )
+
     model = model.to(device)
 
     # Define loss function and optimizer
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.fc.parameters(), lr=0.0001)
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     # Training loop
     for epoch in range(num_epochs):
@@ -110,15 +113,8 @@ def main():
             all_preds.extend(preds.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
 
-        # Calculate metrics for the epoch
         accuracy = accuracy_score(all_labels, all_preds) * 100
-        precision = precision_score(all_labels, all_preds, average='macro')
-        recall = recall_score(all_labels, all_preds, average='macro')
-        f1 = f1_score(all_labels, all_preds, average='macro')
-
-        print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {running_loss / len(train_loader):.4f}, '
-              f'Accuracy: {accuracy:.2f}%, Precision: {precision:.2f}, Recall: {recall:.2f}, '
-              f'F1-Score: {f1:.2f}')
+        print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {running_loss / len(train_loader):.4f}, Accuracy: {accuracy:.2f}%')
 
     # Validation phase
     model.eval()
@@ -131,15 +127,12 @@ def main():
             val_preds.extend(preds.cpu().numpy())
             val_labels.extend(labels.cpu().numpy())
 
-    # Calculate and print validation metrics
     val_accuracy = accuracy_score(val_labels, val_preds) * 100
     print(f'Validation Accuracy: {val_accuracy:.2f}%')
-
-    # Plot confusion matrix for validation set
-    plot_confusion_matrix(val_labels, val_preds, classes=['Non-Drowsy', 'Drowsy'])
+    plot_confusion_matrix(val_labels, val_preds, classes=['Drowsy', 'Non-Drowsy'])
 
     # Save the fine-tuned model
-    torch.save(model.state_dict(), 'drowsiness_detection_model_resnet18.pth')
+    torch.save(model.state_dict(), 'drowsiness_detection_efficientnet_b0.pth')
     print("Model saved successfully!")
 
 if __name__ == '__main__':
